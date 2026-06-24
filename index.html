@@ -4,18 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Astra Multitâche</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <!-- Header content here -->
+        <div class="header-content">
+            <h1>🌟 Astra Multitâche</h1>
+            <p>Votre assistant multiservices en ligne</p>
+        </div>
     </header>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <button class="nav-btn active" data-service="cv">📄 Générateur CV</button>
+            <button class="nav-btn" data-service="lm">💌 Générateur LM</button>
+            <button class="nav-btn" data-service="correcteur">✏️ Correcteur</button>
+            <button class="nav-btn" data-service="traduction">🌐 Traduction</button>
+        </div>
+    </nav>
+
     <main>
-        <!-- Main content here -->
+        <!-- 1. Générateur CV -->
+        <section id="cv" class="service active">
+            <h2>Générateur de CV</h2>
+            <form id="cvForm" class="form-container">
+                <div class="form-group">
+                    <label for="cvNom">Nom Complet:</label>
+                    <input type="text" id="cvNom" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvEmail">Email:</label>
+                    <input type="email" id="cvEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvTelephone">Téléphone:</label>
+                    <input type="tel" id="cvTelephone" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvAdresse">Adresse:</label>
+                    <input type="text" id="cvAdresse" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvExperience">Expérience Professionnelle:</label>
+                    <textarea id="cvExperience" rows="4" placeholder="Décrivez votre expérience..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="cvEducation">Formation:</label>
+                    <textarea id="cvEducation" rows="4" placeholder="Vos diplômes et formations..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="cvCompetences">Compétences:</label>
+                    <textarea id="cvCompetences" rows="3" placeholder="Vos compétences principales..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Générer mon CV</button>
+            </form>
+            <div id="cvPreview" class="preview"></div>
+        </section>
+
+        <!-- 2. Générateur Lettre de Motivation -->
+        <section id="lm" class="service">
+            <h2>Générateur de Lettre de Motivation</h2>
+            <form id="lmForm" class="form-container">
+                <div class="form-group">
+                    <label for="lmNom">Votre Nom:</label>
+                    <input type="text" id="lmNom" required>
+                </div>
+                <div class="form-group">
+                    <label for="lmCompagnie">Nom de l'Entreprise:</label>
+                    <input type="text" id="lmCompagnie" required>
+                </div>
+                <div class="form-group">
+                    <label for="lmPoste">Poste Visé:</label>
+                    <input type="text" id="lmPoste" required>
+                </div>
+                <div class="form-group">
+                    <label for="lmExperience">Votre Expérience Pertinente:</label>
+                    <textarea id="lmExperience" rows="4" placeholder="Décrivez votre expérience en rapport avec le poste..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="lmMотivation">Votre Motivation:</label>
+                    <textarea id="lmMotivation" rows="4" placeholder="Pourquoi voulez-vous ce poste?..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Générer ma LM</button>
+            </form>
+            <div id="lmPreview" class="preview"></div>
+        </section>
+
+        <!-- 3. Correcteur Orthographe et Grammaire -->
+        <section id="correcteur" class="service">
+            <h2>Correcteur Orthographe et Grammaire</h2>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="textToCorrect">Texte à corriger:</label>
+                    <textarea id="textToCorrect" rows="6" placeholder="Collez votre texte ici..."></textarea>
+                </div>
+                <button type="button" class="btn-submit" onclick="corrigerTexte()">Analyser le texte</button>
+            </div>
+            <div id="correcteurPreview" class="preview"></div>
+        </section>
+
+        <!-- 4. Traducteur -->
+        <section id="traduction" class="service">
+            <h2>Traducteur de Documents</h2>
+            <div class="form-container">
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="langueSource">Langue Source:</label>
+                        <select id="langueSource">
+                            <option value="fr">Français</option>
+                            <option value="en">Anglais</option>
+                            <option value="es">Espagnol</option>
+                            <option value="de">Allemand</option>
+                            <option value="it">Italien</option>
+                        </select>
+                    </div>
+                    <div class="form-group half">
+                        <label for="langueCible">Langue Cible:</label>
+                        <select id="langueCible">
+                            <option value="en">Anglais</option>
+                            <option value="fr">Français</option>
+                            <option value="es">Espagnol</option>
+                            <option value="de">Allemand</option>
+                            <option value="it">Italien</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="textToTranslate">Texte à traduire:</label>
+                    <textarea id="textToTranslate" rows="6" placeholder="Collez votre texte à traduire..."></textarea>
+                </div>
+                <button type="button" class="btn-submit" onclick="traireTexte()">Traduire</button>
+            </div>
+            <div id="traductionPreview" class="preview"></div>
+        </section>
     </main>
+
     <footer>
-        <!-- Footer content here -->
+        <p>&copy; 2026 Astra Multitâche - Tous droits réservés</p>
     </footer>
+
     <script src="script.js"></script>
 </body>
 </html>

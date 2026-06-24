@@ -1,0 +1,8 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+header, main, footer {
+    padding: 20px;
+}

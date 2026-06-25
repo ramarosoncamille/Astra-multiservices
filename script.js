@@ -1,10 +1,10 @@
 // script.js - Gestion des services Astra Multitâche avec Google Gemini
 
-// ⚠️ REMPLACEZ PAR VOTRE CLÉ API GEMINI
+// ⚠️ CLÉS API GEMINI - À REMPLACER PAR VOTRE CLÉ
 // Obtenez-la gratuitement sur: https://aistudio.google.com/app/apikey
-const GEMINI_API_KEY = 'AQ.Ab8RN6JpSjRZnHh2Ek9p4ZEspr8ucR_I696nqgZu8Jn9GxGuvA';
+const GEMINI_API_KEY = 'AQ.Ab8RN6JpSjRZnH2Ek9p4ZEspr8ucR_i696nqgZu8Jn9GxGuuA';
 
-// URL de l'API Gemini (API REST REST)
+// URL de l'API Gemini
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -45,12 +45,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ============ FONCTION PRINCIPALE GEMINI ============
 async function appelGemini(prompt) {
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AQ.Ab8RN6JpSjRZnH2Ek9p4ZEspr8ucR_i696nqgZu8Jn9GxGuuA') {
-        throw new Error('❌ Clé API Gemini non configurée correctement.');
+    if (!GEMINI_API_KEY) {
+        throw new Error('❌ Clé API Gemini non configurée.');
     }
 
     try {
         console.log('🚀 Appel Gemini API...');
+        console.log('URL:', GEMINI_API_URL);
         
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
@@ -76,31 +77,35 @@ async function appelGemini(prompt) {
             })
         });
 
-        console.log('📡 Réponse API:', response.status);
+        console.log('📡 Réponse API status:', response.status);
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('❌ Erreur API:', errorData);
+            console.error('❌ Erreur API complète:', errorData);
             
             if (response.status === 429) {
-                throw new Error('⏳ Quota Gemini dépassé. Attendez un peu avant de réessayer.');
+                throw new Error('⏳ Quota Gemini dépassé (429). Attendez quelques secondes et réessayez.');
             }
             if (response.status === 401 || response.status === 403) {
-                throw new Error('🔒 Clé API invalide ou permissions insuffisantes. Vérifiez votre clé API.');
+                throw new Error('🔒 Clé API invalide (401/403). Vérifiez votre clé API sur https://aistudio.google.com/app/apikey');
             }
-            throw new Error(errorData.error?.message || `Erreur API (${response.status})`);
+            if (response.status === 400) {
+                throw new Error('❌ Requête invalide (400). ' + (errorData.error?.message || 'Vérifiez le format de votre requête'));
+            }
+            throw new Error(`❌ Erreur API (${response.status}): ${errorData.error?.message || 'Erreur inconnue'}`);
         }
 
         const data = await response.json();
-        console.log('✅ Réponse reçue');
+        console.log('✅ Réponse reçue de Gemini');
         
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error('Réponse Gemini vide');
+            console.error('❌ Structure réponse invalide:', data);
+            throw new Error('Réponse Gemini vide ou mal formatée');
         }
         
         return data.candidates[0].content.parts[0].text;
     } catch (error) {
-        console.error('Erreur complète:', error);
+        console.error('❌ Erreur complète:', error);
         throw error;
     }
 }
@@ -145,7 +150,7 @@ Le CV doit être:
         preview.innerHTML = `<div class="cv-preview" style="padding: 20px; background: white; border-radius: 8px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
-        afficherErreur('cvPreview', 'Erreur: ' + error.message);
+        afficherErreur('cvPreview', error.message);
     }
 }
 
@@ -185,7 +190,7 @@ La lettre doit être:
         preview.innerHTML = `<div class="lm-preview" style="padding: 20px; background: white; border-radius: 8px; max-width: 800px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
-        afficherErreur('lmPreview', 'Erreur: ' + error.message);
+        afficherErreur('lmPreview', error.message);
     }
 }
 
@@ -216,7 +221,7 @@ Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
         preview.innerHTML = `<div class="correcteur-result" style="padding: 20px; background: white; border-radius: 8px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
-        afficherErreur('correcteurPreview', 'Erreur: ' + error.message);
+        afficherErreur('correcteurPreview', error.message);
     }
 }
 
@@ -258,7 +263,7 @@ Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
         preview.innerHTML = `<div class="traduction-result" style="padding: 20px; background: white; border-radius: 8px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
-        afficherErreur('traductionPreview', 'Erreur: ' + error.message);
+        afficherErreur('traductionPreview', error.message);
     }
 }
 

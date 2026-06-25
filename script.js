@@ -2,10 +2,10 @@
 
 // ⚠️ CLÉS API GEMINI
 // Obtenez-la gratuitement sur: https://aistudio.google.com/app/apikey
-const GEMINI_API_KEY = 'AQ.Ab8RN6JpSjRZnHh2Ek9p4ZEspr8ucR_I696nqgZu8Jn9GxGuvA';
+const GEMINI_API_KEY = 'AIzaSyAim-H9eVryQTk0_yWMJQlV8c_lFsF_LGE';
 
 // URL de l'API Gemini - Utiliser gemini-pro (plus stable)
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Navigation entre les services

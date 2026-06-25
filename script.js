@@ -1,11 +1,11 @@
 // script.js - Gestion des services Astra Multitâche avec Google Gemini
 
-// ⚠️ CLÉS API GEMINI - À REMPLACER PAR VOTRE CLÉ
+// ⚠️ CLÉS API GEMINI
 // Obtenez-la gratuitement sur: https://aistudio.google.com/app/apikey
 const GEMINI_API_KEY = 'AQ.Ab8RN6JpSjRZnHh2Ek9p4ZEspr8ucR_I696nqgZu8Jn9GxGuvA';
 
-// URL de l'API Gemini
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+// URL de l'API Gemini - Utiliser gemini-pro (plus stable)
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Navigation entre les services
@@ -88,6 +88,9 @@ async function appelGemini(prompt) {
             }
             if (response.status === 401 || response.status === 403) {
                 throw new Error('🔒 Clé API invalide (401/403). Vérifiez votre clé API sur https://aistudio.google.com/app/apikey');
+            }
+            if (response.status === 404) {
+                throw new Error('❌ Modèle Gemini non trouvé (404). Essayez avec gemini-pro ou vérifiez votre région.');
             }
             if (response.status === 400) {
                 throw new Error('❌ Requête invalide (400). ' + (errorData.error?.message || 'Vérifiez le format de votre requête'));

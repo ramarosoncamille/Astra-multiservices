@@ -1,6 +1,9 @@
 // script.js - Gestion des services Astra Multitâche avec IA
 
-const API_BASE_URL = 'http://localhost:3000';
+// URL de l'API - Détecte automatiquement si localhost ou production
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000' 
+  : window.location.origin;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Navigation entre les services

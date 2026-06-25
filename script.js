@@ -2,7 +2,7 @@
 
 // ⚠️ À FAIRE: Remplacer par votre clé API Google Gemini
 // Obtenez-la gratuitement sur: https://aistudio.google.com/app/apikey
-const GEMINI_API_KEY = 'AQ.Ab8RN6KwpKkINbUG1KJ4rcSjzpdoZKoVXb0gLDvi4nAwilSNtA';
+const GEMINI_API_KEY = 'AQ.Ab8RN6JiBpn337OjPojV6L9qsit0Di-wckeTCQ5MHRz7QzAO3g';
 
 // URL de l'API Gemini
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';

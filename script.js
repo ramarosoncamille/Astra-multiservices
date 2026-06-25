@@ -1,9 +1,11 @@
-// script.js - Gestion des services Astra Multitâche avec IA
+// script.js - Gestion des services Astra Multitâche avec Google Gemini
 
-// URL de l'API - Détecte automatiquement si localhost ou production
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3000' 
-  : window.location.origin;
+// ⚠️ À FAIRE: Remplacer par votre clé API Google Gemini
+// Obtenez-la gratuitement sur: https://aistudio.google.com/app/apikey
+const GEMINI_API_KEY = 'METTEZ_VOTRE_CLE_API_GEMINI_ICI';
+
+// URL de l'API Gemini
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Navigation entre les services
@@ -41,6 +43,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// ============ FONCTION PRINCIPALE GEMINI ============
+async function appelGemini(prompt) {
+    if (GEMINI_API_KEY === 'METTEZ_VOTRE_CLE_API_GEMINI_ICI') {
+        throw new Error('❌ Clé API Gemini non configurée. Obtenez-la sur https://aistudio.google.com/app/apikey');
+    }
+
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: prompt
+                            }
+                        ]
+                    }
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (response.status === 429) {
+                throw new Error('Quota Gemini dépassé. Attendez un peu avant de réessayer.');
+            }
+            throw new Error(errorData.error?.message || 'Erreur API Gemini');
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+        console.error('Erreur Gemini:', error);
+        throw error;
+    }
+}
+
 // ============ GÉNÉRATEUR CV ============
 async function genererCV() {
     const nom = document.getElementById('cvNom').value;
@@ -56,23 +99,27 @@ async function genererCV() {
         return;
     }
 
-    afficherChargement('cvPreview', 'Génération de votre CV en cours...');
+    afficherChargement('cvPreview', 'Génération de votre CV avec Gemini en cours...');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/generer-cv`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nom, email, telephone, adresse, experience, education, competences })
-        });
+        const prompt = `Génère un CV professionnel en HTML bien formaté avec les informations suivantes:
+        Nom: ${nom}
+        Email: ${email}
+        Téléphone: ${telephone}
+        Adresse: ${adresse}
+        Expérience: ${experience}
+        Formation: ${education}
+        Compétences: ${competences}
+        
+        Le CV doit être:
+        - Professionnel et bien structuré
+        - En HTML (sans balise <html> ni <body>, juste le contenu)
+        - Avec des styles CSS inline
+        - Prêt à être imprimé`;
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Erreur lors de la génération');
-        }
-
-        const data = await response.json();
+        const resultat = await appelGemini(prompt);
         const preview = document.getElementById('cvPreview');
-        preview.innerHTML = `<div class="cv-preview">${data.cv}</div>`;
+        preview.innerHTML = `<div class="cv-preview">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('cvPreview', 'Erreur: ' + error.message);
@@ -92,23 +139,25 @@ async function genererLM() {
         return;
     }
 
-    afficherChargement('lmPreview', 'Génération de votre lettre en cours...');
+    afficherChargement('lmPreview', 'Génération de votre lettre avec Gemini en cours...');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/generer-lm`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nom, compagnie, poste, experience, motivation })
-        });
+        const prompt = `Génère une lettre de motivation professionnelle et personnalisée avec les informations suivantes:
+        Nom du candidat: ${nom}
+        Entreprise: ${compagnie}
+        Poste visé: ${poste}
+        Expérience pertinente: ${experience}
+        Motivation: ${motivation}
+        
+        La lettre doit être:
+        - Professionnelle et persuasive
+        - En HTML bien formaté (sans balise <html> ni <body>)
+        - Avec des styles CSS inline
+        - Personnalisée et unique`;
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Erreur lors de la génération');
-        }
-
-        const data = await response.json();
+        const resultat = await appelGemini(prompt);
         const preview = document.getElementById('lmPreview');
-        preview.innerHTML = `<div class="lm-preview">${data.lm}</div>`;
+        preview.innerHTML = `<div class="lm-preview">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('lmPreview', 'Erreur: ' + error.message);
@@ -124,23 +173,21 @@ async function corrigerTexte() {
         return;
     }
 
-    afficherChargement('correcteurPreview', 'Correction en cours...');
+    afficherChargement('correcteurPreview', 'Correction avec Gemini en cours...');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/corriger-texte`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texte })
-        });
+        const prompt = `Corrige le texte suivant pour l'orthographe, la grammaire et le style. Fournissez:
+        1. Le texte corrigé
+        2. Une liste des erreurs trouvées avec explications
+        
+        Texte à corriger:
+        "${texte}"
+        
+        Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Erreur lors de la correction');
-        }
-
-        const data = await response.json();
+        const resultat = await appelGemini(prompt);
         const preview = document.getElementById('correcteurPreview');
-        preview.innerHTML = `<div class="correcteur-result">${data.correction}</div>`;
+        preview.innerHTML = `<div class="correcteur-result">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('correcteurPreview', 'Erreur: ' + error.message);
@@ -166,23 +213,23 @@ async function traireTexte() {
         return;
     }
 
-    afficherChargement('traductionPreview', 'Traduction en cours...');
+    afficherChargement('traductionPreview', 'Traduction avec Gemini en cours...');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/traduire-texte`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texte, langueSource, langueCible })
-        });
+        const prompt = `Traduis le texte suivant du ${langueSource} vers le ${langueCible}.
+        
+        Texte à traduire:
+        "${texte}"
+        
+        Fournis:
+        1. La traduction complète
+        2. Une note sur les nuances ou difficultés de traduction si nécessaire
+        
+        Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Erreur lors de la traduction');
-        }
-
-        const data = await response.json();
+        const resultat = await appelGemini(prompt);
         const preview = document.getElementById('traductionPreview');
-        preview.innerHTML = `<div class="traduction-result">${data.traduction}</div>`;
+        preview.innerHTML = `<div class="traduction-result">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('traductionPreview', 'Erreur: ' + error.message);
@@ -198,7 +245,7 @@ function afficherErreur(elementId, message) {
 
 function afficherChargement(elementId, message) {
     const preview = document.getElementById(elementId);
-    preview.innerHTML = `<div class="loading" style="background: #e3f2fd; color: #1976d2; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2; display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; display: inline-block;">⚙️</span> ${message}</div>`;
+    preview.innerHTML = `<div class="loading" style="background: #e3f2fd; color: #1976d2; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2; display: flex; align-items: center; gap: 10px;">⏳ ${message}</div>`;
     preview.classList.add('active');
 }
 

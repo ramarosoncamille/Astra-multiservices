@@ -1,11 +1,11 @@
 // script.js - Gestion des services Astra Multitâche avec Google Gemini
 
-// ⚠️ À FAIRE: Remplacer par votre clé API Google Gemini
+// ⚠️ REMPLACEZ PAR VOTRE CLÉ API GEMINI
 // Obtenez-la gratuitement sur: https://aistudio.google.com/app/apikey
-const GEMINI_API_KEY = 'AQ.Ab8RN6Kp7ZJStQI2DLATQxcWxysIsNJrC73mjYsTw77r_Kd8gw';
+const GEMINI_API_KEY = 'AQ.Ab8RN6JpSjRZnH2Ek9p4ZEspr8ucR_i696nqgZu8Jn9GxGuuA';
 
-// URL de l'API Gemini
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+// URL de l'API Gemini (API REST REST)
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Navigation entre les services
@@ -45,11 +45,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ============ FONCTION PRINCIPALE GEMINI ============
 async function appelGemini(prompt) {
-    if (GEMINI_API_KEY === 'METTEZ_VOTRE_CLE_API_GEMINI_ICI') {
-        throw new Error('❌ Clé API Gemini non configurée. Obtenez-la sur https://aistudio.google.com/app/apikey');
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'AQ.Ab8RN6JpSjRZnH2Ek9p4ZEspr8ucR_i696nqgZu8Jn9GxGuuA') {
+        throw new Error('❌ Clé API Gemini non configurée correctement.');
     }
 
     try {
+        console.log('🚀 Appel Gemini API...');
+        
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: {
@@ -64,22 +66,41 @@ async function appelGemini(prompt) {
                             }
                         ]
                     }
-                ]
+                ],
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 2048,
+                }
             })
         });
 
+        console.log('📡 Réponse API:', response.status);
+
         if (!response.ok) {
             const errorData = await response.json();
+            console.error('❌ Erreur API:', errorData);
+            
             if (response.status === 429) {
-                throw new Error('Quota Gemini dépassé. Attendez un peu avant de réessayer.');
+                throw new Error('⏳ Quota Gemini dépassé. Attendez un peu avant de réessayer.');
             }
-            throw new Error(errorData.error?.message || 'Erreur API Gemini');
+            if (response.status === 401 || response.status === 403) {
+                throw new Error('🔒 Clé API invalide ou permissions insuffisantes. Vérifiez votre clé API.');
+            }
+            throw new Error(errorData.error?.message || `Erreur API (${response.status})`);
         }
 
         const data = await response.json();
+        console.log('✅ Réponse reçue');
+        
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+            throw new Error('Réponse Gemini vide');
+        }
+        
         return data.candidates[0].content.parts[0].text;
     } catch (error) {
-        console.error('Erreur Gemini:', error);
+        console.error('Erreur complète:', error);
         throw error;
     }
 }
@@ -103,23 +124,25 @@ async function genererCV() {
 
     try {
         const prompt = `Génère un CV professionnel en HTML bien formaté avec les informations suivantes:
-        Nom: ${nom}
-        Email: ${email}
-        Téléphone: ${telephone}
-        Adresse: ${adresse}
-        Expérience: ${experience}
-        Formation: ${education}
-        Compétences: ${competences}
         
-        Le CV doit être:
-        - Professionnel et bien structuré
-        - En HTML (sans balise <html> ni <body>, juste le contenu)
-        - Avec des styles CSS inline
-        - Prêt à être imprimé`;
+Nom: ${nom}
+Email: ${email}
+Téléphone: ${telephone}
+Adresse: ${adresse}
+Expérience: ${experience}
+Formation: ${education}
+Compétences: ${competences}
+
+Le CV doit être:
+- Professionnel et bien structuré
+- En HTML (sans balise <html> ni <body>, juste le contenu)
+- Avec des styles CSS inline
+- Prêt à être imprimé
+- Avec une mise en page attractive`;
 
         const resultat = await appelGemini(prompt);
         const preview = document.getElementById('cvPreview');
-        preview.innerHTML = `<div class="cv-preview">${resultat}</div>`;
+        preview.innerHTML = `<div class="cv-preview" style="padding: 20px; background: white; border-radius: 8px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('cvPreview', 'Erreur: ' + error.message);
@@ -143,21 +166,23 @@ async function genererLM() {
 
     try {
         const prompt = `Génère une lettre de motivation professionnelle et personnalisée avec les informations suivantes:
-        Nom du candidat: ${nom}
-        Entreprise: ${compagnie}
-        Poste visé: ${poste}
-        Expérience pertinente: ${experience}
-        Motivation: ${motivation}
-        
-        La lettre doit être:
-        - Professionnelle et persuasive
-        - En HTML bien formaté (sans balise <html> ni <body>)
-        - Avec des styles CSS inline
-        - Personnalisée et unique`;
+
+Nom du candidat: ${nom}
+Entreprise: ${compagnie}
+Poste visé: ${poste}
+Expérience pertinente: ${experience}
+Motivation: ${motivation}
+
+La lettre doit être:
+- Professionnelle et persuasive
+- En HTML bien formaté (sans balise <html> ni <body>)
+- Avec des styles CSS inline
+- Personnalisée et unique
+- Formatée comme une vraie lettre`;
 
         const resultat = await appelGemini(prompt);
         const preview = document.getElementById('lmPreview');
-        preview.innerHTML = `<div class="lm-preview">${resultat}</div>`;
+        preview.innerHTML = `<div class="lm-preview" style="padding: 20px; background: white; border-radius: 8px; max-width: 800px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('lmPreview', 'Erreur: ' + error.message);
@@ -177,17 +202,18 @@ async function corrigerTexte() {
 
     try {
         const prompt = `Corrige le texte suivant pour l'orthographe, la grammaire et le style. Fournissez:
-        1. Le texte corrigé
-        2. Une liste des erreurs trouvées avec explications
-        
-        Texte à corriger:
-        "${texte}"
-        
-        Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
+
+1. Le texte corrigé en entier
+2. Une liste des erreurs trouvées avec explications
+
+Texte à corriger:
+"${texte}"
+
+Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
 
         const resultat = await appelGemini(prompt);
         const preview = document.getElementById('correcteurPreview');
-        preview.innerHTML = `<div class="correcteur-result">${resultat}</div>`;
+        preview.innerHTML = `<div class="correcteur-result" style="padding: 20px; background: white; border-radius: 8px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('correcteurPreview', 'Erreur: ' + error.message);
@@ -217,19 +243,19 @@ async function traireTexte() {
 
     try {
         const prompt = `Traduis le texte suivant du ${langueSource} vers le ${langueCible}.
-        
-        Texte à traduire:
-        "${texte}"
-        
-        Fournis:
-        1. La traduction complète
-        2. Une note sur les nuances ou difficultés de traduction si nécessaire
-        
-        Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
+
+Texte à traduire:
+"${texte}"
+
+Fournis:
+1. La traduction complète
+2. Une note sur les nuances ou difficultés de traduction si nécessaire
+
+Réponds en HTML bien formaté (sans balise <html> ni <body>)`;
 
         const resultat = await appelGemini(prompt);
         const preview = document.getElementById('traductionPreview');
-        preview.innerHTML = `<div class="traduction-result">${resultat}</div>`;
+        preview.innerHTML = `<div class="traduction-result" style="padding: 20px; background: white; border-radius: 8px;">${resultat}</div>`;
         preview.classList.add('active');
     } catch (error) {
         afficherErreur('traductionPreview', 'Erreur: ' + error.message);
@@ -239,13 +265,13 @@ async function traireTexte() {
 // ============ FONCTIONS UTILITAIRES ============
 function afficherErreur(elementId, message) {
     const preview = document.getElementById(elementId);
-    preview.innerHTML = `<div class="error" style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 8px; border-left: 4px solid #c62828;">❌ ${message}</div>`;
+    preview.innerHTML = `<div class="error" style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 8px; border-left: 4px solid #c62828; font-weight: 500;">❌ ${message}</div>`;
     preview.classList.add('active');
 }
 
 function afficherChargement(elementId, message) {
     const preview = document.getElementById(elementId);
-    preview.innerHTML = `<div class="loading" style="background: #e3f2fd; color: #1976d2; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2; display: flex; align-items: center; gap: 10px;">⏳ ${message}</div>`;
+    preview.innerHTML = `<div class="loading" style="background: #e3f2fd; color: #1976d2; padding: 15px; border-radius: 8px; border-left: 4px solid #1976d2; display: flex; align-items: center; gap: 10px; font-weight: 500;">⏳ ${message}</div>`;
     preview.classList.add('active');
 }
 
